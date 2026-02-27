@@ -1,4 +1,4 @@
-const baseURL = "https://api.frankfurter.app/latest?base=USD";
+const baseURL = "https://api.frankfurter.app/latest";
 
 let dropdowns = document.querySelectorAll(".dropdown select");
 let btn = document.querySelector("button");
@@ -6,58 +6,66 @@ let fromCurr = document.querySelector(".from select");
 let toCurr = document.querySelector(".to select");
 let msg = document.querySelector(".msg");
 
+// Populate dropdowns
 for (let opt of dropdowns) {
     for (let currCodes in countryList) {
-        //console.log(currCodes, countryList[currCodes]); // Log currency codes and country codes for debugging
         let newOption = document.createElement("option");
-        newOption.innerText = currCodes; // Set the display text to the currency code
-        newOption.value = currCodes; // Set the value attribute to the currency code
+        newOption.innerText = currCodes;
+        newOption.value = currCodes;
+
         if (opt.name === "from" && currCodes === "USD") {
             newOption.selected = "selected";
-        } else if (opt.name === "to" && currCodes === "INR") {
+        } 
+        else if (opt.name === "to" && currCodes === "INR") {
             newOption.selected = "selected";
         }
+
         opt.append(newOption);
     }
 
-    // Add event listener to update flag when a dropdown value changes
     opt.addEventListener("change", (evt) => {
-        updateFlag(evt.target); // Update the flag for the selected currency
+        updateFlag(evt.target);
+        updateExchangeRate();   // 🔥 auto update when dropdown changes
     });
 }
 
+// Update flag
 const updateFlag = (element) => {
-    let crrncyCode = element.value; // Get the selected currency code
-    let cntryCode = countryList[crrncyCode]; // Get the corresponding country code
+    let crrncyCode = element.value;
+    let cntryCode = countryList[crrncyCode];
     let newSrce = `https://flagsapi.com/${cntryCode}/shiny/64.png`;
-    let img = element.parentElement.querySelector("img"); // Find the image element in the same container
-    img.src = newSrce; // Update the image source to the new URL
+    let img = element.parentElement.querySelector("img");
+    img.src = newSrce;
 };
 
+// Update exchange rate
 const updateExchangeRate = async () => {
     let amount = document.querySelector(".amount input");
-    let amntVal = amount.value; // Get the entered amount
+    let amntVal = amount.value;
+
     if (amntVal === "" || amntVal < 1) {
         amntVal = 1;
         amount.value = "1";
     }
 
-    const URL = `${baseURL}&symbols=${toCurr.value.toUpperCase()}`; // Construct the API URL with the 'to' currency
+    const URL = `${baseURL}?base=${fromCurr.value}&symbols=${toCurr.value}`;
+
     let response = await fetch(URL);
     let data = await response.json();
-    rate = data.rates[toCurr.value.toUpperCase()]; // Extract the exchange rate for the selected 'to' currency
-    //console.log(rate); // Log the exchange rate for debugging
+
+    let rate = data.rates[toCurr.value];
     let finalAmount = rate * amntVal;
-    //console.log(finalAmount); // Log the converted amount for debugging
-    msg.innerText = `${amntVal} ${fromCurr.value} = ${finalAmount} ${toCurr.value}`;
+
+    msg.innerText = `${amntVal} ${fromCurr.value} = ${finalAmount.toFixed(2)} ${toCurr.value}`;
 };
 
+// Button click
 btn.addEventListener("click", (evt) => {
-    evt.preventDefault(); // Prevent form submission
+    evt.preventDefault();
     updateExchangeRate();
 });
 
-// Trigger the exchange rate update when the page loads
+// Page load
 window.addEventListener("load", () => {
     updateExchangeRate();
 });
