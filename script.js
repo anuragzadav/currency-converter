@@ -23,9 +23,9 @@ for (let opt of dropdowns) {
         opt.append(newOption);
     }
 
+    // Only update flag on change (NOT exchange rate)
     opt.addEventListener("change", (evt) => {
         updateFlag(evt.target);
-        updateExchangeRate();   // 🔥 auto update when dropdown changes
     });
 }
 
@@ -38,7 +38,7 @@ const updateFlag = (element) => {
     img.src = newSrce;
 };
 
-// Update exchange rate
+// Update exchange rate (ONLY when button is clicked)
 const updateExchangeRate = async () => {
     let amount = document.querySelector(".amount input");
     let amntVal = amount.value;
@@ -59,13 +59,13 @@ const updateExchangeRate = async () => {
     msg.innerText = `${amntVal} ${fromCurr.value} = ${finalAmount.toFixed(2)} ${toCurr.value}`;
 };
 
-// Button click
+// Button click event
 btn.addEventListener("click", (evt) => {
     evt.preventDefault();
     updateExchangeRate();
 });
 
-// Page load
+// Initial conversion on page load (optional, you can remove this if you want)
 window.addEventListener("load", () => {
     updateExchangeRate();
 });
